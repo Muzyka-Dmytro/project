@@ -1,0 +1,331 @@
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct User {
+    char firstName[50];
+    char lastName[50];
+    char username[50];
+    char password[50];
+};
+
+
+void registerUser() {
+    struct User user;
+
+    printf("Введіть ім'я: ");
+    scanf("%s", user.firstName);
+
+    printf("Введіть прізвище: ");
+    scanf("%s", user.lastName);
+
+    printf("Введіть нікнейм: ");
+    scanf("%s", user.username);
+
+    printf("Введіть пароль: ");
+    scanf("%s", user.password);
+
+    FILE* file = fopen("users.txt", "a");
+    if (file == NULL) {
+        printf("Помилка відкриття файлу.\n");
+        return;
+    }
+
+    fprintf(file, "%s %s %s %s\n", user.firstName, user.lastName, user.username, user.password);
+
+    fclose(file);
+
+    printf("Реєстрація успішна.\n");
+}
+
+void loginUser(struct User* user, int* isAuthenticated) {
+    char username[50];
+    char password[50];
+
+    printf("Введіть нікнейм: ");
+    scanf("%s", username);
+
+    printf("Введіть пароль: ");
+    scanf("%s", password);
+
+    FILE* file = fopen("users.txt", "r");
+    if (file == NULL) {
+        printf("Помилка відкриття файлу.\n");
+        return;
+    }
+
+    char line[200];
+    int found = 0;
+
+    while (fgets(line, sizeof(line), file)) {
+        char savedUsername[50];
+        char savedPassword[50];
+        sscanf(line, "%*s %*s %s %s", savedUsername, savedPassword);
+
+        if (strcmp(savedUsername, username) == 0 && strcmp(savedPassword, password) == 0) {
+            strcpy(user->username, savedUsername);
+            strcpy(user->password, savedPassword);
+            found = 1;
+            break;
+        }
+    }
+
+    fclose(file);
+
+    if (found) {
+        *isAuthenticated = 1;
+    }
+    else {
+        *isAuthenticated = 0;
+    }
+}
+
+
+void showProfile(struct User user) {
+    printf("Мій профіль:\n");
+    printf("Нікнейм: %s\n", user.username);
+    printf("Пароль: %s\n", user.password);
+    printf("Ім'я: %s\n", user.firstName);
+    printf("Прізвище: %s\n", user.lastName);
+}
+
+void changePassword(struct User* user) {
+    printf("Введіть старий пароль: ");
+    char oldPassword[50];
+    scanf("%s", oldPassword);
+
+    if (strcmp(user->password, oldPassword) != 0) {
+        printf("Старий пароль невірний. Пароль не буде змінений.\n");
+        return;
+    }
+
+    printf("Введіть новий пароль: ");
+    scanf("%s", user->password);
+    printf("Пароль змінено.\n");
+
+    // Оновлення пароля у файлі
+    FILE* file = fopen("users.txt", "r");
+    FILE* tempFile = fopen("temp.txt", "w");
+    if (file == NULL || tempFile == NULL) {
+        printf("Помилка відкриття файлів.\n");
+        return;
+    }
+
+    char line[200];
+    char savedUsername[50];
+
+    while (fgets(line, sizeof(line), file)) {
+        sscanf(line, "%*s %*s %s", savedUsername); // Зчитуємо нікнейм з рядка
+        if (strcmp(savedUsername, user->username) == 0) {
+            fprintf(tempFile, "%s %s %s %s\n", user->firstName, user->lastName, user->username, user->password);
+        }
+        else {
+            fprintf(tempFile, "%s", line);
+        }
+    }
+
+    fclose(file);
+    fclose(tempFile);
+
+    // Перейменовуємо тимчасовий файл на оригінальний
+    remove("users.txt");
+    rename("temp.txt", "users.txt");
+}
+
+void changeUsername(struct User* user) {
+    printf("Введіть новий нікнейм: ");
+    scanf("%s", user->username);
+    printf("Нікнейм змінено.\n");
+}
+
+void changeFirstName(struct User* user) {
+    printf("Введіть нове ім'я: ");
+    scanf("%s", user->firstName);
+    printf("Ім'я змінено.\n");
+}
+
+void changeLastName(struct User* user) {
+    printf("Введіть нове прізвище: ");
+    scanf("%s", user->lastName);
+    printf("Прізвище змінено.\n");
+}
+
+void sendMessage(struct User user) {
+    char recipient[50];
+    char message[100];
+
+    printf("Введіть одержувача: ");
+    scanf("%s", recipient);
+
+    printf("Введіть повідомлення: ");
+    scanf(" %[^\n]s", message);
+
+    FILE* file = fopen("messages.txt", "a");
+    if (file == NULL) {
+        printf("Помилка відкриття файлу.\n");
+        return;
+    }
+
+    fprintf(file, "--------------------\n");
+    fprintf(file, "Від: %s\n", user.username);
+    fprintf(file, "Кому: %s\n", recipient);
+    fprintf(file, "Повідомлення: %s\n", message);
+    fprintf(file, "--------------------\n");
+
+    fclose(file);
+
+    printf("Повідомлення відправлено.\n");
+}
+
+void viewMessages() {
+    printf("Переглядаєте отримані повідомлення:\n");
+    // Тут можна додати код для перегляду отриманих повідомлень
+
+    FILE* file = fopen("messages.txt", "r");
+    if (file == NULL) {
+        printf("Помилка відкриття файлу.\n");
+        return;
+    }
+
+    char line[200];
+    int messageCount = 0;
+
+    while (fgets(line, sizeof(line), file)) {
+        messageCount++;
+        printf("%s", line); // Виводимо зчитаний рядок (повідомлення) на екран
+    }
+
+    fclose(file);
+
+    if (messageCount == 0) {
+        printf("Немає отриманих повідомлень.\n");
+    }
+}
+
+void logout(int* isAuthenticated) {
+    *isAuthenticated = 0;
+    printf("Ви вийшли з аккаунту.\n");
+}
+
+int main() {
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+    int choice;
+    struct User currentUser;
+    int isAuthenticated = 0;
+    int settingChoice; // Оголошуємо settingChoice на початку функції main()
+
+    while (1) {
+        if (!isAuthenticated) {
+            system("cls"); // Очистка екрану для Windows
+            // system("clear"); // Очистка екрану для Unix-подібних систем (Linux, macOS)
+
+            printf("\nМеню (ТЕМА: Електронна пошта)\n");
+            printf("1. Реєстрація\n");
+            printf("2. Авторизація\n");
+            printf("3. Вихід\n");
+            printf("Ваш вибір: ");
+            scanf("%d", &choice);
+
+            switch (choice) {
+            case 1:
+                registerUser();
+                system("pause"); // Пауза перед очищенням екрану
+                break;
+            case 2:
+                loginUser(&currentUser, &isAuthenticated);
+                if (isAuthenticated) {
+                    printf("Авторизація успішна.\n");
+                    system("pause"); // Пауза перед очищенням екрану
+                }
+                else {
+                    printf("Невірні дані або невдача авторизації.\n");
+                    system("pause"); // Пауза перед очищенням екрану
+                }
+                break;
+            case 3:
+                exit(0);
+            default:
+                printf("Невірний вибір. Спробуйте ще раз.\n");
+                system("pause"); // Пауза перед очищенням екрану
+                break;
+            }
+        }
+        else {
+            system("cls"); // Очистка екрану для Windows
+            // system("clear"); // Очистка екрану для Unix-подібних систем (Linux, macOS)
+
+            printf("\nМеню (ТЕМА: Електронна пошта)\n");
+            printf("1. Мій профіль\n");
+            printf("2. Налаштування\n");
+            printf("3. Відправити повідомлення\n");
+            printf("4. Переглянути отримані повідомлення\n");
+            printf("5. Вийти з аккаунту\n");
+            printf("Ваш вибір: ");
+            scanf("%d", &choice);
+
+            switch (choice) {
+            case 1:
+                showProfile(currentUser);
+                system("pause"); // Пауза перед очищенням екрану
+                break;
+            case 2:
+                printf("Налаштування:\n");
+                printf("1. Змінити пароль\n");
+                printf("2. Змінити нікнейм\n");
+                printf("3. Змінити ім'я\n");
+                printf("4. Змінити прізвище\n");
+                printf("5. Повернутись назад\n");
+                printf("Ваш вибір: ");
+                scanf("%d", &settingChoice);
+
+                switch (settingChoice) {
+                case 1:
+                    changePassword(&currentUser);
+                    system("pause"); // Пауза перед очищенням екрану
+                    break;
+                case 2:
+                    changeUsername(&currentUser);
+                    system("pause"); // Пауза перед очищенням екрану
+                    break;
+                case 3:
+                    changeFirstName(&currentUser);
+                    system("pause"); // Пауза перед очищенням екрану
+                    break;
+                case 4:
+                    changeLastName(&currentUser);
+                    system("pause"); // Пауза перед очищенням екрану
+                    break;
+                case 5:
+                    break; // Повертаємося до головного меню
+                default:
+                    printf("Невірний вибір. Спробуйте ще раз.\n");
+                    system("pause"); // Пауза перед очищенням екрану
+                    break;
+                }
+                break;
+            case 3:
+                sendMessage(currentUser);
+                system("pause"); // Пауза перед очищенням екрану
+                break;
+            case 4:
+                viewMessages();
+                system("pause"); // Пауза перед очищенням екрану
+                break;
+            case 5:
+                logout(&isAuthenticated);
+                system("pause"); // Пауза перед очищенням екрану
+                break;
+            default:
+                printf("Невірний вибір. Спробуйте ще раз.\n");
+                system("pause"); // Пауза перед очищенням екрану
+                break;
+            }
+        }
+    }
+
+    return 0;
+}
