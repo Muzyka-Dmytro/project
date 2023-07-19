@@ -182,7 +182,6 @@ void sendMessage(struct User user) {
 
 void viewMessages() {
     printf("Переглядаєте отримані повідомлення:\n");
-    // Тут можна додати код для перегляду отриманих повідомлень
 
     FILE* file = fopen("messages.txt", "r");
     if (file == NULL) {
@@ -220,8 +219,7 @@ int main() {
 
     while (1) {
         if (!isAuthenticated) {
-            system("cls"); // Очистка екрану для Windows
-            // system("clear"); // Очистка екрану для Unix-подібних систем (Linux, macOS)
+            system("cls");
 
             printf("\nМеню (ТЕМА: Електронна пошта)\n");
             printf("1. Реєстрація\n");
@@ -255,8 +253,7 @@ int main() {
             }
         }
         else {
-            system("cls"); // Очистка екрану для Windows
-            // system("clear"); // Очистка екрану для Unix-подібних систем (Linux, macOS)
+            system("cls"); 
 
             printf("\nМеню (ТЕМА: Електронна пошта)\n");
             printf("1. Мій профіль\n");
