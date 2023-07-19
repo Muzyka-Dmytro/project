@@ -1,0 +1,251 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct User {
+    char firstName[50];
+    char lastName[50];
+    char username[50];
+    char password[50];
+};
+
+struct Message {
+    char sender[50];
+    char recipient[50];
+    char content[100];
+};
+
+void registerUser() {
+    struct User user;
+
+    printf("Введіть ім'я: ");
+    scanf("%s", user.firstName);
+
+    printf("Введіть прізвище: ");
+    scanf("%s", user.lastName);
+
+    printf("Введіть нікнейм: ");
+    scanf("%s", user.username);
+
+    printf("Введіть пароль: ");
+    scanf("%s", user.password);
+
+    FILE *file = fopen("users.txt", "a");
+    if (file == NULL) {
+        printf("Помилка відкриття файлу.\n");
+        return;
+    }
+
+    fprintf(file, "%s %s %s %s\n", user.firstName, user.lastName, user.username, user.password);
+
+    fclose(file);
+
+    printf("Реєстрація успішна.\n");
+}
+
+void loginUser(struct User *user, int *isAuthenticated) {
+    char username[50];
+    char password[50];
+
+    printf("Введіть нікнейм: ");
+    scanf("%s", username);
+
+    printf("Введіть пароль: ");
+    scanf("%s", password);
+
+    FILE *file = fopen("users.txt", "r");
+    if (file == NULL) {
+        printf("Помилка відкриття файлу.\n");
+        return;
+    }
+
+    char line[200];
+
+    while (fgets(line, sizeof(line), file)) {
+        char savedFirstName[50];
+        char savedLastName[50];
+        char savedUsername[50];
+        char savedPassword[50];
+        sscanf(line, "%s %s %s %s", savedFirstName, savedLastName, savedUsername, savedPassword);
+
+        if (strcmp(savedUsername, username) == 0 && strcmp(savedPassword, password) == 0) {
+            strcpy(user->firstName, savedFirstName);
+            strcpy(user->lastName, savedLastName);
+            strcpy(user->username, savedUsername);
+            strcpy(user->password, savedPassword);
+            *isAuthenticated = 1;
+            break;
+        }
+    }
+
+    fclose(file);
+
+    if (*isAuthenticated) {
+        printf("Авторизація успішна.\n");
+    } else {
+        printf("Невірні дані або невдача авторизації.\n");
+    }
+}
+
+void showProfile(struct User user) {
+    printf("Мій профіль:\n");
+    printf("Нікнейм: %s\n", user.username);
+    printf("Пароль: %s\n", user.password);
+    printf("Ім'я: %s\n", user.firstName);
+    printf("Прізвище: %s\n", user.lastName);
+}
+
+void changePassword(struct User *user) {
+    printf("Введіть новий пароль: ");
+    scanf("%s", user->password);
+    printf("Пароль змінено.\n");
+}
+
+void changeUsername(struct User *user) {
+    printf("Введіть новий нікнейм: ");
+    scanf("%s", user->username);
+    printf("Нікнейм змінено.\n");
+}
+
+void changeFirstName(struct User *user) {
+    printf("Введіть нове ім'я: ");
+    scanf("%s", user->firstName);
+    printf("Ім'я змінено.\n");
+}
+
+void changeLastName(struct User *user) {
+    printf("Введіть нове прізвище: ");
+    scanf("%s", user->lastName);
+    printf("Прізвище змінено.\n");
+}
+
+void sendMessage(struct User user, struct Message *messages, int *messageCount) {
+    char recipient[50];
+    char content[100];
+
+    printf("Введіть одержувача: ");
+    scanf("%s", recipient);
+
+    printf("Введіть повідомлення: ");
+    scanf("%s", content);
+
+    if (*messageCount < 100) {
+        struct Message message;
+        strcpy(message.sender, user.username);
+        strcpy(message.recipient, recipient);
+        strcpy(message.content, content);
+        messages[*messageCount] = message;
+        (*messageCount)++;
+        printf("Повідомлення відправлено:\n");
+        printf("Від: %s\n", message.sender);
+        printf("Кому: %s\n", message.recipient);
+        printf("Повідомлення: %s\n", message.content);
+    } else {
+        printf("Не вдалося відправити повідомлення. Досягнуто максимальну кількість повідомлень.\n");
+    }
+}
+void viewMessages(struct User user, struct Message *messages, int messageCount) {
+    printf("Повідомлення:\n");
+    int i;
+    for (i = 0; i < messageCount; i++) {
+        if (strcmp(messages[i].recipient, user.username) == 0) {
+            printf("Від: %s\n", messages[i].sender);
+            printf("Повідомлення: %s\n", messages[i].content);
+            printf("\n");
+        }
+    }
+}
+
+int main() {
+    int choice;
+    struct User currentUser;
+    int isAuthenticated = 0;
+    struct Message messages[100];
+    int messageCount = 0;
+
+    while (1) {
+        printf("\nМеню (ТЕМА: Електронна пошта)\n");
+        printf("1. Реєстрація\n");
+        printf("2. Авторизація\n");
+        printf("3. Мій профіль\n");
+        printf("4. Налаштування\n");
+        printf("5. Відправити повідомлення\n");
+        printf("6. Переглянути повідомлення\n");
+        printf("7. Вихід\n");
+        printf("Ваш вибір: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                registerUser();
+                break;
+            case 2:
+                if (!isAuthenticated) {
+                    loginUser(&currentUser, &isAuthenticated);
+                } else {
+                    printf("Ви вже авторизовані.\n");
+                }
+                break;
+            case 3:
+                if (isAuthenticated) {
+                    showProfile(currentUser);
+                } else {
+                    printf("Спочатку потрібно авторизуватись.\n");
+                }
+                break;
+            case 4:
+                if (isAuthenticated) {
+                    int settingChoice;
+                    printf("Налаштування:\n");
+                    printf("1. Змінити пароль\n");
+                    printf("2. Змінити нікнейм\n");
+                    printf("3. Змінити ім'я\n");
+                    printf("4. Змінити прізвище\n");
+                    printf("Ваш вибір: ");
+                    scanf("%d", &settingChoice);
+
+                    switch (settingChoice) {
+                        case 1:
+                            changePassword(&currentUser);
+                            break;
+                        case 2:
+                            changeUsername(&currentUser);
+                            break;
+                        case 3:
+                            changeFirstName(&currentUser);
+                            break;
+                        case 4:
+                            changeLastName(&currentUser);
+                            break;
+                        default:
+                            printf("Невірний вибір. Спробуйте ще раз.\n");
+                            break;
+                    }
+                } else {
+                    printf("Спочатку потрібно авторизуватись.\n");
+                }
+                break;
+            case 5:
+                if (isAuthenticated) {
+                    sendMessage(currentUser, messages, &messageCount);
+                } else {
+                    printf("Спочатку потрібно авторизуватись.\n");
+                }
+                break;
+            case 6:
+                if (isAuthenticated) {
+                    viewMessages(currentUser, messages, messageCount);
+                } else {
+                    printf("Спочатку потрібно авторизуватись.\n");
+                }
+                break;
+            case 7:
+                exit(0);
+            default:
+                printf("Невірний вибір. Спробуйте ще раз.\n");
+                break;
+        }
+    }
+
+    return 0;
+}
