@@ -1,0 +1,46 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+void showProfile() {
+    printf("Мій профіль - мої дані\n");
+}
+
+void showSettings() {
+    printf("Налаштування - змінити пароль, нікнейм тощо...\n");
+}
+
+void sendMessage() {
+    printf("Відправити повідомлення\n");
+}
+
+int main() {
+    int choice;
+
+    while (1) {
+        printf("Меню (ТЕМА: Електронна пошта)\n");
+        printf("1. Мій профіль (мої дані)\n");
+        printf("2. Налаштування (змінити пароль, нікнейм тощо...)\n");
+        printf("3. Відправити повідомлення\n");
+        printf("4. Вихід\n");
+        printf("Ваш вибір: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                showProfile();
+                break;
+            case 2:
+                showSettings();
+                break;
+            case 3:
+                sendMessage();
+                break;
+            case 4:
+                exit(0);
+            default:
+                printf("Невірний вибір. Спробуйте ще раз.\n");
+        }
+    }
+
+    return 0;
+}
